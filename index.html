@@ -7,14 +7,23 @@
   <title>LinearLab 2.0 | Álgebra Lineal</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="js/matematica.js" defer></script>
-<script src="js/geometria.js" defer></script>
-<script src="js/sarrus.js" defer></script>
-<script src="js/app.js" defer></script>
+  <script src="js/geometria.js" defer></script>
+  <script src="js/sarrus.js" defer></script>
+  <script src="js/app.js" defer></script>
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a><aside class="sidebar"><div class="brand"><span>λ</span><div>LinearLab <small>LABORATORIO · 2.0</small></div></div><nav aria-label="Navegación principal"><button data-page="inicio" aria-current="page">⌂ &nbsp; Inicio</button><button data-page="grafica" id="tab-grafica">⌗ &nbsp; Visualizador 2D</button><button data-page="sarrus" id="tab-sarrus">▦ &nbsp; Determinantes</button><button data-page="practica">◇ &nbsp; Práctica</button><button data-page="historial">◷ &nbsp; Historial</button><button data-page="fundamentos">≡ &nbsp; Fundamentos</button></nav><div class="side-bottom"><button id="theme" aria-pressed="false">◐ &nbsp; Cambiar tema</button><small>IF0012 · Universidad de Costa Rica</small></div></aside>
   <main class="shell" id="main" tabindex="-1"><header class="topbar"><span>Laboratorio de Álgebra Lineal</span><span class="surface-label">IF0012 / 2026</span></header>
-  <section id="panel-inicio" class="tool-pane"><div class="welcome"><p class="overline">LABORATORIO INTERACTIVO</p><h1>Las matemáticas, en movimiento.</h1><p>Explora el plano cartesiano y comprende cada operación de un determinante. Dos herramientas, una misma experiencia.</p><button class="button primary" data-page="grafica">Explorar geometría →</button></div><div class="home-grid"><article class="panel-card"><span class="surface-label">01 / GEOMETRÍA</span><h2>Visualizador 2D</h2><p>Construye puntos y segmentos y observa la transformación de escala.</p><button class="button primary" data-page="grafica">Abrir visualizador</button></article><article class="panel-card"><span class="surface-label">02 / ÁLGEBRA</span><h2>Regla de Sarrus</h2><p>Calcula determinantes con aritmética decimal exacta y diagonales interactivas.</p><button class="button primary" data-page="sarrus">Abrir calculadora</button></article><article class="panel-card"><span class="surface-label">03 / APRENDIZAJE</span><h2>Modo práctica</h2><p>Pon a prueba tus conocimientos con ejercicios nuevos.</p><button class="button secondary" data-page="practica">Practicar</button></article></div></section>
+  <section id="panel-inicio" class="tool-pane">
+    <div class="welcome">
+      <p class="overline">LABORATORIO INTERACTIVO · IF0012</p>
+      <h1>Las matemáticas, en movimiento.</h1>
+      <p>Explora el plano cartesiano y comprende cada operación de un determinante. Dos herramientas, una misma experiencia.</p>
+      <p><small><strong>Integrantes:</strong> Aarón Guevara · Yahir Núñez · Jeffry Morales</small></p>
+      <button class="button primary" data-page="grafica">Explorar geometría →</button>
+    </div>
+    <div class="home-grid"><article class="panel-card"><span class="surface-label">01 / GEOMETRÍA</span><h2>Visualizador 2D</h2><p>Construye puntos y segmentos y observa la transformación de escala.</p><button class="button primary" data-page="grafica">Abrir visualizador</button></article><article class="panel-card"><span class="surface-label">02 / ÁLGEBRA</span><h2>Regla de Sarrus</h2><p>Calcula determinantes con aritmética decimal exacta y diagonales interactivas.</p><button class="button primary" data-page="sarrus">Abrir calculadora</button></article><article class="panel-card"><span class="surface-label">03 / APRENDIZAJE</span><h2>Modo práctica</h2><p>Pon a prueba tus conocimientos con ejercicios nuevos.</p><button class="button secondary" data-page="practica">Practicar</button></article></div>
+  </section>
     <section id="panel-grafica" class="tool-pane" hidden aria-labelledby="tab-grafica">
       <div class="section-heading">
         <div><p class="overline">PARTE I · 40 PUNTOS</p><h2>Visualizador geométrico 2D</h2><p>Dibuja en el panel izquierdo y observa cómo se transforma la figura en el derecho.</p></div>
@@ -84,8 +93,11 @@
         </article>
       </div>
     </section>
-<section id="panel-practica" class="tool-pane" hidden><h2>Modo práctica</h2><article class="panel-card"><p>Calcula el determinante sin consultar el resultado.</p><div id="practice-matrix" class="matrix-view"></div><form id="practice-form"><label>Tu respuesta <input id="practice-answer" required inputmode="decimal"></label><button class="button primary">Comprobar</button></form><p id="practice-feedback" role="status"></p><button id="practice-new" class="button secondary">Nuevo ejercicio</button> <button id="practice-solution" class="button secondary">Ver procedimiento</button></article></section><section id="panel-historial" class="tool-pane" hidden><h2>Historial de determinantes</h2><article class="panel-card"><p>Los últimos 50 cálculos se conservan localmente cuando el navegador lo permite.</p><button id="history-clear" class="button secondary">Limpiar historial</button><div id="history-list"></div></article></section><section id="panel-fundamentos" class="tool-pane" hidden><h2>Fundamentos matemáticos</h2><div class="home-grid"><article class="panel-card"><h3>Escala uniforme</h3><p>(x′, y′) = (kx, ky). El origen permanece fijo; k positivo conserva el primer cuadrante.</p><p>Si A=(2,3) y k=2, A′=(4,6).</p></article><article class="panel-card"><h3>Segmentos</h3><p>Distancia = √((x₂−x₁)²+(y₂−y₁)²). Pendiente = (y₂−y₁)/(x₂−x₁), indefinida si x₂=x₁. Punto medio = ((x₁+x₂)/2,(y₁+y₂)/2).</p></article><article class="panel-card"><h3>Sarrus</h3><p>det(A)=aei+bfg+cdh−ceg−afh−bdi. Solo para matrices 3×3. Una matriz cuadrada es singular si su determinante es cero.</p></article></div></section>
-    <footer class="footer">Proyecto académico IF0012 · Visualizador 2D y regla de Sarrus · Implementación propia en JavaScript</footer>
+    <section id="panel-practica" class="tool-pane" hidden><h2>Modo práctica</h2><article class="panel-card"><p>Calcula el determinante sin consultar el resultado.</p><div id="practice-matrix" class="matrix-view"></div><form id="practice-form"><label>Tu respuesta <input id="practice-answer" required inputmode="decimal"></label><button class="button primary">Comprobar</button></form><p id="practice-feedback" role="status"></p><button id="practice-new" class="button secondary">Nuevo ejercicio</button> <button id="practice-solution" class="button secondary">Ver procedimiento</button></article></section><section id="panel-historial" class="tool-pane" hidden><h2>Historial de determinantes</h2><article class="panel-card"><p>Los últimos 50 cálculos se conservan localmente cuando el navegador lo permite.</p><button id="history-clear" class="button secondary">Limpiar historial</button><div id="history-list"></div></article></section><section id="panel-fundamentos" class="tool-pane" hidden><h2>Fundamentos matemáticos</h2><div class="home-grid"><article class="panel-card"><h3>Escala uniforme</h3><p>(x′, y′) = (kx, ky). El origen permanece fijo; k positivo conserva el primer cuadrante.</p><p>Si A=(2,3) y k=2, A′=(4,6).</p></article><article class="panel-card"><h3>Segmentos</h3><p>Distancia = √((x₂−x₁)²+(y₂−y₁)²). Pendiente = (y₂−y₁)/(x₂−x₁), indefinida si x₂=x₁. Punto medio = ((x₁+x₂)/2,(y₁+y₂)/2).</p></article><article class="panel-card"><h3>Sarrus</h3><p>det(A)=aei+bfg+cdh−ceg−afh−bdi. Solo para matrices 3×3. Una matriz cuadrada es singular si su determinante es cero.</p></article></div></section>
+    <footer class="footer">
+      Proyecto académico IF0012 · Visualizador 2D y regla de Sarrus · Implementación propia en JavaScript<br>
+      Integrantes: Aarón Guevara · Yahir Núñez · Jeffry Morales
+    </footer>
   </main>
 </body>
 </html>
