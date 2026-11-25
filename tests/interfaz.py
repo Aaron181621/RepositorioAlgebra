@@ -1,0 +1,20 @@
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+import os
+base=Path(__file__).resolve().parents[1]
+html=(base/'index.html').read_text().replace('<link rel="stylesheet" href="styles.css" />','<style>'+ (base/'styles.css').read_text()+'</style>')
+for name in ['matematica','geometria','sarrus','app']:
+ html=html.replace(f'<script src="js/{name}.js" defer></script>', '<script>'+ (base/'js'/f'{name}.js').read_text()+'</script>')
+with sync_playwright() as p:
+ b=p.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM','/usr/bin/chromium'),args=['--no-sandbox']); page=b.new_page(viewport={'width':1440,'height':1000},accept_downloads=True); errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+ page.set_content(html,wait_until='load'); q=page.locator; q('#tab-grafica').click(); canvas=q('#canvas-original'); bounds=canvas.bounding_box();page.mouse.click(bounds['x']+bounds['width']*.4,bounds['y']+100);assert q('#elements tr').count()==1
+ q('#coord-x').fill('2');q('#coord-y').fill('3');q('#coord-submit').click();assert q('#elements tr').count()==2
+ q('#zoom-slider').fill('2');assert '(4, 6)' in q('#elements tr').nth(1).inner_text();q('#elements tr').nth(1).get_by_text('Editar').click();q('#coord-x').fill('4');q('#coord-submit').click();assert '(8, 6)' in q('#elements tr').nth(1).inner_text();q('#btn-undo').click();assert '(4, 6)' in q('#elements tr').nth(1).inner_text();q('#btn-redo').click();assert '(8, 6)' in q('#elements tr').nth(1).inner_text();q('#mode-segment').click();page.mouse.click(bounds['x']+bounds['width']*.4,bounds['y']+130);page.mouse.click(bounds['x']+bounds['width']*.6,bounds['y']+200);assert q('#elements tr').count()==3;assert 'd=' in q('#elements tr').nth(2).inner_text();q('#fit-plane').check();
+ with page.expect_download() as d:q('#export-original').click()
+ assert d.value.suggested_filename.endswith('.png');page.screenshot(path=str(base/'vista_geometria.png'),full_page=False)
+ q('#elements tr').nth(0).get_by_text('Eliminar').click();assert q('#elements tr').count()==2;q('#btn-clear').click();assert q('#elements tr').count()==0;q('#btn-undo').click();assert q('#elements tr').count()==2
+ q('#tab-sarrus').click();assert q('#det-result').inner_text()=='22';q('#step-next').click();assert q('#sarrus-svg line').count()==1;q('#step-next').click();q('#step-prev').click();assert 'Paso 1' in q('#step-label').inner_text();q('#show-negative').click();assert q('#sarrus-svg line').count()==3
+ q('#m00').fill('abc');q('#matrix-form button[type=submit]').click();assert q('#form-error').is_visible();q('#btn-example').click();assert q('#det-result').inner_text()=='22';q('#random-matrix').click();assert q('#result-content').is_visible();q('#btn-example').click();
+ with page.expect_download() as d:q('#export-result').click()
+ assert d.value.suggested_filename=='sarrus.txt';page.screenshot(path=str(base/'vista_sarrus.png'),full_page=False);q('nav [data-page=historial]').click();assert q('#history-list .history-row').count()>0;q('nav [data-page=practica]').click();q('#practice-answer').fill('0');q('#practice-form button').click();assert q('#practice-feedback').inner_text();q('#practice-solution').click();assert q('#result-content').is_visible();q('#theme').click();assert q('html').get_attribute('data-theme')=='dark';page.screenshot(path=str(base/'vista_oscura.png'),full_page=False);assert not errors,errors
+ mobile=b.new_page(viewport={'width':390,'height':844});mobile.set_content(html,wait_until='load');mobile.locator('#tab-grafica').focus();mobile.keyboard.press('Enter');assert mobile.locator('#panel-grafica').is_visible();assert mobile.evaluate('document.documentElement.scrollWidth <= innerWidth');mobile.locator('#tab-sarrus').click();assert mobile.locator('#det-result').inner_text()=='22';assert mobile.evaluate('document.documentElement.scrollWidth <= innerWidth');mobile.screenshot(path=str(base/'vista_movil.png'),full_page=False);b.close();print('OK: dibujo, coordenadas, edición, escala, undo/redo, segmento, PNG, eliminar, limpiar, Sarrus, pasos, errores, aleatoria, TXT, historial, práctica, tema, teclado y móvil.')

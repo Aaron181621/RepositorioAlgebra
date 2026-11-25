@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Visualizador geométrico 2D y calculadora de determinantes 3×3 mediante Sarrus." />
+  <title>LinearLab 2.0 | Álgebra Lineal</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="js/matematica.js" defer></script>
+<script src="js/geometria.js" defer></script>
+<script src="js/sarrus.js" defer></script>
+<script src="js/app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Saltar al contenido</a><aside class="sidebar"><div class="brand"><span>λ</span><div>LinearLab <small>LABORATORIO · 2.0</small></div></div><nav aria-label="Navegación principal"><button data-page="inicio" aria-current="page">⌂ &nbsp; Inicio</button><button data-page="grafica" id="tab-grafica">⌗ &nbsp; Visualizador 2D</button><button data-page="sarrus" id="tab-sarrus">▦ &nbsp; Determinantes</button><button data-page="practica">◇ &nbsp; Práctica</button><button data-page="historial">◷ &nbsp; Historial</button><button data-page="fundamentos">≡ &nbsp; Fundamentos</button></nav><div class="side-bottom"><button id="theme" aria-pressed="false">◐ &nbsp; Cambiar tema</button><small>IF0012 · Universidad de Costa Rica</small></div></aside>
+  <main class="shell" id="main" tabindex="-1"><header class="topbar"><span>Laboratorio de Álgebra Lineal</span><span class="surface-label">IF0012 / 2026</span></header>
+  <section id="panel-inicio" class="tool-pane"><div class="welcome"><p class="overline">LABORATORIO INTERACTIVO</p><h1>Las matemáticas, en movimiento.</h1><p>Explora el plano cartesiano y comprende cada operación de un determinante. Dos herramientas, una misma experiencia.</p><button class="button primary" data-page="grafica">Explorar geometría →</button></div><div class="home-grid"><article class="panel-card"><span class="surface-label">01 / GEOMETRÍA</span><h2>Visualizador 2D</h2><p>Construye puntos y segmentos y observa la transformación de escala.</p><button class="button primary" data-page="grafica">Abrir visualizador</button></article><article class="panel-card"><span class="surface-label">02 / ÁLGEBRA</span><h2>Regla de Sarrus</h2><p>Calcula determinantes con aritmética decimal exacta y diagonales interactivas.</p><button class="button primary" data-page="sarrus">Abrir calculadora</button></article><article class="panel-card"><span class="surface-label">03 / APRENDIZAJE</span><h2>Modo práctica</h2><p>Pon a prueba tus conocimientos con ejercicios nuevos.</p><button class="button secondary" data-page="practica">Practicar</button></article></div></section>
+    <section id="panel-grafica" class="tool-pane" hidden aria-labelledby="tab-grafica">
+      <div class="section-heading">
+        <div><p class="overline">PARTE I · 40 PUNTOS</p><h2>Visualizador geométrico 2D</h2><p>Dibuja en el panel izquierdo y observa cómo se transforma la figura en el derecho.</p></div>
+        <div class="hint-pill">Primer cuadrante: x ≥ 0, y ≥ 0</div>
+      </div>
+      <div class="toolbar" aria-label="Controles de dibujo">
+        <span class="toolbar-label">Herramienta:</span>
+        <button id="mode-point" class="button mode active" type="button" aria-pressed="true"><span class="mini-dot"></span> Punto (1 clic)</button>
+        <button id="mode-segment" class="button mode" type="button" aria-pressed="false"><span class="mini-segment"></span> Segmento (2 clics)</button>
+        <div class="toolbar-spacer"></div>
+        <button id="btn-undo" class="button secondary" type="button">Deshacer</button>
+        <button id="btn-redo" class="button secondary" type="button">Rehacer</button><button id="btn-clear" class="button secondary danger" type="button">Limpiar dibujo</button>
+      </div>
+      <div class="stats"><div><small>Elementos registrados</small><strong id="stat-count">0</strong></div><div><small>Factor de escala</small><strong id="stat-scale">1×</strong></div><div><small>Transformación</small><strong>2D</strong></div></div><div class="visual-grid">
+        <article class="panel-card">
+          <div class="panel-top"><div><h3>Plano original</h3><p>Haz clic dentro de la cuadrícula</p></div><span class="surface-label">ENTRADA</span></div>
+          <canvas id="canvas-original" width="540" height="390" aria-label="Plano cartesiano original. Haz clic para dibujar puntos o segmentos."></canvas>
+          <div class="zoom-area">
+            <div class="zoom-head"><label for="zoom-slider">Escala del panel derecho</label><output id="zoom-value" for="zoom-slider">100 %</output></div>
+            <input id="zoom-slider" type="range" min="0.5" max="2.5" value="1" step="0.1" aria-label="Zoom del panel derecho" />
+            <div class="zoom-ticks"><span>50 % · Reducir</span><button id="reset-zoom" type="button" class="text-button">Restablecer</button><span>250 % · Ampliar</span></div>
+          </div>
+        </article>
+        <article class="panel-card">
+          <div class="panel-top"><div><h3>Plano transformado</h3><p>Actualización automática mediante el Zoom</p></div><span class="surface-label accent">SALIDA</span></div>
+          <canvas id="canvas-transformed" width="540" height="390" aria-label="Plano cartesiano transformado por la escala seleccionada."></canvas>
+          <label class="checkline"><input type="checkbox" id="fit-plane"> Ajustar área visible (mantiene la transformación)</label><div class="transform-note"><strong>Transformación aplicada:</strong> <span id="transform-formula">(x′, y′) = (1.0x, 1.0y)</span><span id="scale-matrix" class="matrix-mini"></span><span class="transform-sub">La escala se aplica a las coordenadas, no a una captura del dibujo.</span></div>
+        </article>
+      </div>
+      <div class="status-strip"><span id="draw-status" role="status" aria-live="polite">Selecciona «Punto» o «Segmento» y haz clic en el plano izquierdo.</span><span id="draw-counter" class="counter">0 puntos · 0 segmentos</span></div>
+      <div class="home-grid geometry-extras"><article class="panel-card"><h3>Coordenadas manuales</h3><form id="coord-form"><div class="coord-grid"><label>X inicial<input id="coord-x" type="number" min="0" max="10" step="any" required></label><label>Y inicial<input id="coord-y" type="number" min="0" max="10" step="any" required></label><label class="endpoint" hidden>X final<input id="coord-x2" type="number" min="0" max="10" step="any"></label><label class="endpoint" hidden>Y final<input id="coord-y2" type="number" min="0" max="10" step="any"></label></div><div class="form-actions"><button class="button primary" id="coord-submit">Agregar</button><button class="button secondary" type="button" id="cancel-edit" hidden>Cancelar edición</button></div><p id="coord-error" role="alert"></p></form></article><article class="panel-card"><h3>Exportar planos</h3><p>Guarda la representación actual como imagen PNG.</p><button class="button secondary" id="export-original">Plano original</button> <button class="button secondary" id="export-transformed">Plano transformado</button></article></div><article class="panel-card"><h3>Elementos y propiedades</h3><div class="table-scroll"><table><thead><tr><th>Etiqueta</th><th>Original</th><th>Transformado</th><th>Distancia / pendiente / punto medio</th><th>Acciones</th></tr></thead><tbody id="elements"></tbody></table></div></article><p class="tip"><strong>Cómo usarlo:</strong> «Punto» agrega un punto por clic. «Segmento» une dos clics consecutivos. Los elementos se guardan y el deslizador cambia únicamente la representación de la derecha. A escalas superiores a 100 %, parte de una figura puede quedar fuera del área visible.</p>
+    </section>
+
+    <section id="panel-sarrus" class="tool-pane" aria-labelledby="tab-sarrus" hidden>
+      <div class="section-heading">
+        <div><p class="overline">PARTE II · 45 PUNTOS</p><h2>Calculadora de determinantes</h2><p>Introduce los nueve valores de una matriz 3 × 3 y revisa cada operación de la regla de Sarrus.</p></div>
+      </div>
+      <div class="sarrus-grid">
+        <article class="panel-card matrix-input-card">
+          <div class="panel-top"><div><h3>Matriz de entrada</h3><p>Admite números negativos, decimales y cero</p></div></div>
+          <form id="matrix-form" novalidate>
+            <div class="input-matrix" role="group" aria-label="Matriz de tres filas y tres columnas">
+              <input id="m00" aria-label="Fila 1, columna 1" inputmode="decimal" type="text" autocomplete="off" value="1" />
+              <input id="m01" aria-label="Fila 1, columna 2" inputmode="decimal" type="text" autocomplete="off" value="2" />
+              <input id="m02" aria-label="Fila 1, columna 3" inputmode="decimal" type="text" autocomplete="off" value="3" />
+              <input id="m10" aria-label="Fila 2, columna 1" inputmode="decimal" type="text" autocomplete="off" value="0" />
+              <input id="m11" aria-label="Fila 2, columna 2" inputmode="decimal" type="text" autocomplete="off" value="4" />
+              <input id="m12" aria-label="Fila 2, columna 3" inputmode="decimal" type="text" autocomplete="off" value="5" />
+              <input id="m20" aria-label="Fila 3, columna 1" inputmode="decimal" type="text" autocomplete="off" value="1" />
+              <input id="m21" aria-label="Fila 3, columna 2" inputmode="decimal" type="text" autocomplete="off" value="0" />
+              <input id="m22" aria-label="Fila 3, columna 3" inputmode="decimal" type="text" autocomplete="off" value="6" />
+            </div>
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+            <div class="form-actions"><button class="button primary" type="submit">Calcular determinante</button><button class="button secondary" type="button" id="btn-example">Cargar ejemplo</button><button class="button secondary" type="button" id="random-matrix">Aleatoria</button><button class="button secondary" type="button" id="btn-clear-matrix">Vaciar</button></div>
+          </form>
+          <div class="formula-explainer"><strong>Regla de Sarrus</strong><p>Se suman los productos de las tres diagonales que descienden (↘) y se les resta la suma de los productos de las tres diagonales que ascienden (↗).</p></div>
+        </article>
+        <article class="panel-card result-card" id="results-card">
+          <div class="panel-top"><div><h3>Resultado y procedimiento</h3><p>Operaciones calculadas directamente, sin bibliotecas de álgebra</p></div><span class="surface-label accent">PASO A PASO</span></div>
+          <div id="result-placeholder" class="result-placeholder" hidden>Completa la matriz y presiona «Calcular determinante».</div>
+          <div id="result-content" aria-live="polite">
+            <div class="result-overview"><div><span class="minor-label">Matriz evaluada</span><div id="matrix-view" class="matrix-view"></div></div><div class="det-box"><span>DETERMINANTE</span><strong id="det-result">—</strong></div></div>
+            <p id="classification" class="tip"></p><div class="visual-section"><div class="visual-top"><div><h4>Diagonales de Sarrus</h4><p>Las dos primeras columnas se repiten a la derecha.</p></div><div class="direction-toggle" aria-label="Tipo de diagonales"><button id="show-positive" class="direction-button selected" type="button" aria-pressed="true">↘ Positivas</button><button id="show-negative" class="direction-button" type="button" aria-pressed="false">↗ Negativas</button></div></div><svg id="sarrus-svg" viewBox="0 0 520 228" role="img" aria-label="Visualización de la regla de Sarrus"></svg><div class="form-actions"><button class="button secondary" id="step-prev">Anterior</button><button class="button secondary" id="step-next">Siguiente paso</button><button class="button secondary" id="step-play">Animar</button><span id="step-label" role="status"></span></div></div>
+            <div class="steps-grid"><div class="steps-block positive"><h4>1. Diagonales principales (↘)</h4><ol id="positive-steps"></ol><p class="sum-line">Suma positiva = <strong id="positive-sum"></strong></p></div><div class="steps-block negative"><h4>2. Diagonales secundarias (↗)</h4><ol id="negative-steps"></ol><p class="sum-line">Suma negativa = <strong id="negative-sum"></strong></p></div></div>
+            <button class="button secondary" id="export-result">Exportar procedimiento (TXT)</button> <button class="button secondary" id="print-result">Imprimir / PDF</button><div class="final-operation"><span>3. Operación final</span><strong id="final-exp"></strong></div>
+          </div>
+        </article>
+      </div>
+    </section>
+<section id="panel-practica" class="tool-pane" hidden><h2>Modo práctica</h2><article class="panel-card"><p>Calcula el determinante sin consultar el resultado.</p><div id="practice-matrix" class="matrix-view"></div><form id="practice-form"><label>Tu respuesta <input id="practice-answer" required inputmode="decimal"></label><button class="button primary">Comprobar</button></form><p id="practice-feedback" role="status"></p><button id="practice-new" class="button secondary">Nuevo ejercicio</button> <button id="practice-solution" class="button secondary">Ver procedimiento</button></article></section><section id="panel-historial" class="tool-pane" hidden><h2>Historial de determinantes</h2><article class="panel-card"><p>Los últimos 50 cálculos se conservan localmente cuando el navegador lo permite.</p><button id="history-clear" class="button secondary">Limpiar historial</button><div id="history-list"></div></article></section><section id="panel-fundamentos" class="tool-pane" hidden><h2>Fundamentos matemáticos</h2><div class="home-grid"><article class="panel-card"><h3>Escala uniforme</h3><p>(x′, y′) = (kx, ky). El origen permanece fijo; k positivo conserva el primer cuadrante.</p><p>Si A=(2,3) y k=2, A′=(4,6).</p></article><article class="panel-card"><h3>Segmentos</h3><p>Distancia = √((x₂−x₁)²+(y₂−y₁)²). Pendiente = (y₂−y₁)/(x₂−x₁), indefinida si x₂=x₁. Punto medio = ((x₁+x₂)/2,(y₁+y₂)/2).</p></article><article class="panel-card"><h3>Sarrus</h3><p>det(A)=aei+bfg+cdh−ceg−afh−bdi. Solo para matrices 3×3. Una matriz cuadrada es singular si su determinante es cero.</p></article></div></section>
+    <footer class="footer">Proyecto académico IF0012 · Visualizador 2D y regla de Sarrus · Implementación propia en JavaScript</footer>
+  </main>
+</body>
+</html>
