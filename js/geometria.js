@@ -22,7 +22,8 @@ function initGeometria() {
 
   function cancelar() {
     editIndex = -1;
-    $('coord-submit').textContent = 'Agregar';$('cancel-edit').hidden = true;
+    $('coord-submit').textContent = 'Agregar';
+    $('cancel-edit').hidden = true;
   }
 
   function coord(p) {
@@ -66,7 +67,8 @@ function initGeometria() {
               $('coord-x2').value = pts[1].x;
               $('coord-y2').value = pts[1].y;
             }
-            $('coord-submit').textContent = 'Guardar cambios';$('cancel-edit').hidden = false;
+            $('coord-submit').textContent = 'Guardar cambios';
+            $('cancel-edit').hidden = false;
             $('coord-x').focus();
           }
         ],
@@ -275,7 +277,8 @@ function initGeometria() {
     const segmentos = historial.filter(x => x.tipo === 'segmento').length;
 
     $('stat-count').textContent = historial.length;
-    $('stat-scale').textContent = zoom + '×';$('scale-matrix').textContent = `S = [ ${zoom}  0 ; 0  ${zoom} ]`;
+    $('stat-scale').textContent = zoom + '×';
+    $('scale-matrix').textContent = `S = [ ${zoom}  0 ; 0  ${zoom} ]`;
 
     renderTable();
     $('draw-counter').textContent = `${puntos} punto${puntos === 1 ? '' : 's'} · ${segmentos} segmento${segmentos === 1 ? '' : 's'}`;
@@ -300,7 +303,8 @@ function initGeometria() {
     });
 
     for (const [id, m] of [['mode-point', 'punto'], ['mode-segment', 'segmento']]) {
-      $(id).classList.toggle('active', m === modo);$(id).setAttribute('aria-pressed', String(m === modo));
+      $(id).classList.toggle('active', m === modo);
+      $(id).setAttribute('aria-pressed', String(m === modo));
     }
 
     mensajeDibujo(
@@ -311,7 +315,8 @@ function initGeometria() {
     dibujarAmbosPlanos();
   }
 
-  $('mode-point').addEventListener('click', () => cambiarModo('punto'));$('mode-segment').addEventListener('click', () => cambiarModo('segmento'));
+  $('mode-point').addEventListener('click', () => cambiarModo('punto'));
+  $('mode-segment').addEventListener('click', () => cambiarModo('segmento'));
 
   canvasIzquierdo.addEventListener('pointerdown', e => {
     const rect = canvasIzquierdo.getBoundingClientRect();
@@ -330,4 +335,127 @@ function initGeometria() {
 
     if (modo === 'punto') {
       commit();
-      historial.push({ tipo
+      historial.push({ tipo: 'punto', punto: p, label: 'P' + (++serial) });
+      mensajeDibujo(`Punto registrado en (${fmt(p.x)}, ${fmt(p.y)}).`);
+    } else if (!inicioSegmento) {
+      inicioSegmento = p;
+      mensajeDibujo(`Inicio (${fmt(p.x)}, ${fmt(p.y)}) guardado. Haz el segundo clic para cerrar el segmento.`);
+    } else {
+      commit();
+      historial.push({ tipo: 'segmento', inicio: inicioSegmento, fin: p, label: 'S' + (++serial) });
+      inicioSegmento = null;
+      mensajeDibujo('Segmento registrado. Puedes seguir añadiendo elementos.');
+    }
+
+    dibujarAmbosPlanos();
+  });
+
+  $('btn-undo').addEventListener('click', () => {
+    if (inicioSegmento) {
+      inicioSegmento = null;
+      mensajeDibujo('Se canceló el inicio de segmento pendiente.');
+    } else if (undo.length) {
+      redo.push(structuredClone(historial));
+      historial = undo.pop();
+      cancelar();
+      mensajeDibujo('Acción deshecha.');
+    } else {
+      mensajeDibujo('No hay elementos para deshacer.');
+    }
+    dibujarAmbosPlanos();
+  });
+
+  $('btn-clear').addEventListener('click', () => {
+    commit();
+    historial.length = 0;
+    inicioSegmento = null;
+    cancelar();
+    mensajeDibujo('Se limpió el plano. Puedes comenzar un nuevo dibujo.');
+    dibujarAmbosPlanos();
+  });
+
+  function actualizarZoom() {
+    zoom = Number($('zoom-slider').value);
+    $('zoom-value').textContent = `${Math.round(zoom * 100)} %`;
+    $('transform-formula').textContent = `(x′, y′) = (${zoom.toFixed(1)}x, ${zoom.toFixed(1)}y)`;
+    dibujarAmbosPlanos();
+  }
+
+  $('zoom-slider').addEventListener('input', actualizarZoom);
+  $('reset-zoom').addEventListener('click', () => {
+    $('zoom-slider').value = '1';
+    actualizarZoom();
+  });
+
+  new ResizeObserver(dibujarAmbosPlanos).observe(canvasIzquierdo);
+  new ResizeObserver(dibujarAmbosPlanos).observe(canvasDerecho);
+
+  $('btn-redo').onclick = () => {
+    if (redo.length) {
+      undo.push(structuredClone(historial));
+      historial = redo.pop();
+      inicioSegmento = null;
+      cancelar();
+      dibujarAmbosPlanos();
+    }
+  };
+
+  $('cancel-edit').onclick = cancelar;
+  $('fit-plane').onchange = dibujarAmbosPlanos;
+
+  $('coord-form').onsubmit = e => {
+    e.preventDefault();
+
+    const read = (x, y) => {
+      const a = $(x).value;
+      const b = $(y).value;
+      const valido =
+        a.trim() &&
+        b.trim() &&
+        [a, b].every(v => Number.isFinite(Number(v)) && Number(v) >= 0 && Number(v) <= 10);
+      return valido ? { x: Number(a), y: Number(b) } : null;
+    };
+
+    const a = read('coord-x', 'coord-y');
+    const b = modo === 'segmento' ? read('coord-x2', 'coord-y2') : null;
+
+    if (!a || (modo === 'segmento' && !b)) {
+      $('coord-error').textContent = 'Introduce coordenadas válidas entre 0 y 10.';
+      return;
+    }
+
+    $('coord-error').textContent = '';
+    commit();
+
+    const label = editIndex >= 0
+      ? historial[editIndex].label
+      : (modo === 'punto' ? 'P' : 'S') + (++serial);
+
+    const obj = modo === 'punto'
+      ? { tipo: modo, punto: a, label }
+      : { tipo: modo, inicio: a, fin: b, label };
+
+    if (editIndex >= 0) {
+      historial[editIndex] = obj;
+    } else {
+      historial.push(obj);
+    }
+
+    inicioSegmento = null;
+    cancelar();
+    dibujarAmbosPlanos();
+    mensajeDibujo('Elemento guardado: ' + label);
+  };
+
+  for (const [id, c] of [['export-original', canvasIzquierdo], ['export-transformed', canvasDerecho]]) {
+    $(id).onclick = () => {
+      const a = document.createElement('a');
+      a.href = c.toDataURL('image/png');
+      a.download = id + '.png';
+      a.click();
+    };
+  }
+
+  actualizarZoom();
+  return dibujarAmbosPlanos;
+}
