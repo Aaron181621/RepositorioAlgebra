@@ -1,5 +1,66 @@
 // Coordinación de módulos; sin servidor ni dependencias de ejecución.
-const memoryStore={};function readStore(key,fallback){try{return JSON.parse(localStorage.getItem(key))??memoryStore[key]??fallback;}catch{return memoryStore[key]??fallback;}}function writeStore(key,value){memoryStore[key]=value;try{localStorage.setItem(key,JSON.stringify(value));}catch{}}
-function downloadText(text,name){const url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-let redraw=()=>{};function navigate(page){document.querySelectorAll('.tool-pane').forEach(e=>e.hidden=e.id!=='panel-'+page);document.querySelectorAll('nav [data-page]').forEach(b=>{if(b.dataset.page===page)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});window.scrollTo(0,0);document.getElementById('main').focus({preventScroll:true});if(page==='grafica')requestAnimationFrame(redraw);}
-document.addEventListener('DOMContentLoaded',()=>{const t=document.getElementById('theme');function theme(dark){document.documentElement.dataset.theme=dark?'dark':'light';t.setAttribute('aria-pressed',String(dark));writeStore('linear-theme',dark);redraw();}theme(readStore('linear-theme',false));redraw=initGeometria();initSarrus();t.onclick=()=>theme(t.getAttribute('aria-pressed')!=='true');document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>navigate(b.dataset.page));});
+// Coordinación general de navegación, tema y descargas.
+let redraw = () => {};
+
+function readStore(key, fallback) {
+  try {
+    const val = localStorage.getItem(key);
+    return val !== null ? JSON.parse(val) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeStore(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {}
+}
+
+function downloadText(text, filename) {
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function navigate(page) {
+  document.querySelectorAll('.tool-pane').forEach(panel => {
+    panel.hidden = panel.id !== 'panel-' + page;
+  });
+
+  document.querySelectorAll('nav [data-page]').forEach(btn => {
+    if (btn.dataset.page === page) {
+      btn.setAttribute('aria-current', 'page');
+    } else {
+      btn.removeAttribute('aria-current');
+    }
+  });
+
+  window.scrollTo(0, 0);
+  document.getElementById('main').focus({ preventScroll: true });
+  if (page === 'grafica') requestAnimationFrame(redraw);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const themeBtn = document.getElementById('theme');
+
+  function applyTheme(isDark) {
+    document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+    themeBtn.setAttribute('aria-pressed', String(isDark));
+    writeStore('linear-theme', isDark);
+    redraw();
+  }
+
+  applyTheme(readStore('linear-theme', false));
+  redraw = initGeometria();
+  initSarrus();
+
+  themeBtn.onclick = () => applyTheme(themeBtn.getAttribute('aria-pressed') !== 'true');
+  document.querySelectorAll('[data-page]').forEach(btn => {
+    btn.onclick = () => navigate(btn.dataset.page);
+  });
+});
